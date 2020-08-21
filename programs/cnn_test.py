@@ -20,7 +20,7 @@ today = datetime.datetime.today()
 
 MODEL_NAME = 'model/2019-12-18(01-40-41).ckpt'
 
-TEST_DIR = '/home/moriya/Desktop/old_researched/村上/Project/nn_test/test_vid'
+TEST_DIR = '/home/moriya/Desktop/old_researched/村上/Project/nn_test/test_vid/'
 TEMP_DIR = 'run/' + today.strftime("%Y-%m-%d(%H-%M-%S)") + '/'
 TEXT_NAME = 'log.txt'
 COLOR_CHANNELS = 3 # RGB
