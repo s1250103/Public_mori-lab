@@ -12,6 +12,10 @@ import os
 import time
 import datetime
 
+print("EXECUTING!!")
+sys.exit()
+
+
 today = datetime.datetime.today()
 LOG_NAME = 'log/' + today.strftime("%Y-%m-%d(%H-%M-%S)") + '.txt'
 MODEL_NAME = 'model/' + today.strftime("%Y-%m-%d(%H-%M-%S)") + '.ckpt'
