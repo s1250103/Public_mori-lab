@@ -12,12 +12,15 @@ import os
 import time
 import datetime
 
+print("EXECUTING!!") 
+sys.exit()
+
 
 today = datetime.datetime.today()
 LOG_NAME = 'log/' + today.strftime("%Y-%m-%d(%H-%M-%S)") + '.txt'
 MODEL_NAME = 'model/' + today.strftime("%Y-%m-%d(%H-%M-%S)") + '.ckpt'
 TEMP_DIR = 'temp/' + today.strftime("%Y-%m-%d(%H-%M-%S)")
-TRAIN_DIR = '/home/moriya/Desktop/old_researched/村上/Project/nn_test/test_vid'  #'/home/s1240099/Desktop/Project/nn_test/CM_vid/'
+TRAIN_DIR = '../Project/nn_test/CM_vid/'  #'/home/s1240099/Desktop/Project/nn_test/CM_vid/'
 COLOR_CHANNELS = 3 # RGB
 WIDTH = 320/4  # 80
 WIDTH2 = 80
