@@ -55,3 +55,5 @@ flags.DEFINE_integer('convs', 3, 'size of conv height & width')
 flags.DEFINE_integer('convd', 3, 'size of conv depth')
 flags.DEFINE_string('act_func', 'relu', 'activation function')
 flags.DEFINE_integer('max_time', 3, 'training time')
+
+print("read this")
