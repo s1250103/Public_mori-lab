@@ -12,6 +12,7 @@ import os
 import time
 import datetime
 
+import other_funcs as of
 
 today = datetime.datetime.today()
 LOG_NAME = 'log/' + today.strftime("%Y-%m-%d(%H-%M-%S)") + '.txt'
@@ -57,7 +58,7 @@ flags.DEFINE_integer('max_time', 3, 'training time')
 
 
 if __name__ == '__main__':
-
+    #---------------------------------------------- file
     # データを入れる配列
     train_vid = []
     train_label = []
@@ -111,7 +112,9 @@ if __name__ == '__main__':
                     if count == DEPTH:
                         break
             if count == DEPTH:
-                video = list_flatten(video)
+                # -------　ここまではこのファイルだけで動く
+
+                video = of.list_flatten(video)
                 video = np.array(video)
                 train_vid.append(video)
                 #train_vid.append(list_flatten(video))
@@ -135,7 +138,7 @@ if __name__ == '__main__':
 
             # print "[%d]%s: %s : %d"%(v, d, f, i)
         labels.append(len(files))
-
+#----------------------------------------------
     #print ("train_label:%s   train_video:%s")%(len(train_label), len(train_vid))
     #""
     print("train_label:{} train_video:{}".format(len(train_label),len(train_vid)))
