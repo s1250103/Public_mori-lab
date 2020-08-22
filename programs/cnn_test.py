@@ -11,8 +11,6 @@ import os
 import time
 import datetime
 
-from tensorflow.contrib import rnn
-
 
 args = sys.argv
 today = datetime.datetime.today()
