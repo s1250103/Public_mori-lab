@@ -174,13 +174,13 @@ if __name__ == '__main__':
 
         keep_prob = tf.compat.v1.placeholder("float")
         # inference()を呼び出してモデルを作る
-        logits = inference(videos_placeholder, keep_prob)
+        logits = of.inference(videos_placeholder, keep_prob)
         # loss()を呼び出して損失を計算
-        loss_value = loss(logits, labels_placeholder)
+        loss_value = of.loss(logits, labels_placeholder)
         # training()を呼び出して訓練
-        train_op = training(loss_value, FLAGS.learning_rate)
+        train_op = of.training(loss_value, FLAGS.learning_rate)
         # 精度の計算
-        acc = accuracy(logits, labels_placeholder)
+        acc = of.accuracy(logits, labels_placeholder)
 
         # 保存の準備
         #saver = tf.train.Saver()
