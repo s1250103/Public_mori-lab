@@ -1,3 +1,5 @@
+import tensorflow as tf
+
 def inference(videos_placeholder, keep_prob):
     """ 予測モデルを作成する関数
 
