@@ -1,4 +1,59 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import numpy as np
+import sys
+import cv2
 import tensorflow as tf
+import tensorflow.python.platform
+import math
+import random
+import os
+import time
+import datetime
+
+
+args = sys.argv
+today = datetime.datetime.today()
+
+
+MODEL_NAME = 'model/2019-12-18(01-40-41).ckpt'
+
+TEST_DIR = '/home/moriya/Desktop/old_researched/村上/Project/nn_test/test_vid/'
+TEMP_DIR = 'run/' + today.strftime("%Y-%m-%d(%H-%M-%S)") + '/'
+TEXT_NAME = 'log.txt'
+COLOR_CHANNELS = 3 # RGB
+WIDTH = 320/4
+HEIGHT = 180/4
+WIDTH2 = 80
+HEIGHT2 = 45
+FPS = 14
+FULL_CONNECT_UNIT = 1024
+DEPTH = 30 #入力する画像の数
+IMAGE_PIXELS = DEPTH*HEIGHT*WIDTH*COLOR_CHANNELS
+
+flags = tf.app.flags
+FLAGS = flags.FLAGS
+
+test_dirs = ['0.other', '1.food', '2.car', '3.cosme']
+
+NUM_CLASSES = len(test_dirs)
+
+# flags.DEFINE_string('train', 'train.txt', 'File name of train data')
+# flags.DEFINE_string('test', 'test2.txt', 'File name of test data')
+flags.DEFINE_string('train_dir', 'temp', 'Directory to put the training data.')
+flags.DEFINE_integer('max_steps', 10000, 'Number of steps to run trainer.')
+#flags.DEFINE_integer('hidden1', 64, 'Number of units in hidden layer 1.')
+#flags.DEFINE_integer('hidden2', 24, 'Number of units in hidden layer 2.')
+flags.DEFINE_integer('batch_size', 1, 'Batch size'
+                     'Must divide evenly into the dataset sizes.')
+flags.DEFINE_float('learning_rate', 1e-5, 'Initial learning rate.')
+flags.DEFINE_integer('channel1', 8 , 'Number of conv1 & conv2 channel')
+flags.DEFINE_integer('channel2', 16, 'Number of conv3 & conv4 channel')
+flags.DEFINE_integer('channel3', 32, 'Number of conv5 & conv6 channel')
+flags.DEFINE_integer('channel4', 64, 'Number of conv7 & conv8 channel')
+flags.DEFINE_integer('convs', 3, 'size of conv height & width')
+flags.DEFINE_integer('convd', 3, 'size of conv depth')
+flags.DEFINE_string('act_func', 'relu', 'activation function')
 
 def inference(videos_placeholder, keep_prob):
     """ 予測モデルを作成する関数
@@ -43,6 +98,7 @@ def inference(videos_placeholder, keep_prob):
     #ここx_videoで５次元配列にしていますね...。
     print(videos_placeholder)
     x_video = tf.reshape(videos_placeholder, [-1, DEPTH, HEIGHT2, WIDTH2, COLOR_CHANNELS])
+    #print("hoge",x_video.shape)
 
     # 畳み込み層1の作成
     with tf.name_scope("conv1") as scope:
@@ -129,6 +185,7 @@ def inference(videos_placeholder, keep_prob):
     # 結合層1の作成
     with tf.name_scope("fc1") as scope:
         mb, d, h, w, c = h_pool4.get_shape().as_list()
+        #"pool5      d:{} h:{} w:{} c:{}".format("d", "h", "w", "c")
         W_fc1 = weight_variable([d*h*w*c, FULL_CONNECT_UNIT])#前者から後者のヘッジをつなげた。
         b_fc1 = bias_variable([FULL_CONNECT_UNIT])
         h_pool_flat = tf.reshape(h_pool4, [-1, d*h*w*c])
@@ -169,58 +226,6 @@ def activation_function(x):
 
     return y
 
-def loss(logits, labels):
-    """ lossを計算する関数
-
-    引数:
-      logits: ロジットのtensor, float - [batch_size, NUM_CLASSES]
-      labels: ラベルのtensor, int32 - [batch_size, NUM_CLASSES]
-
-    返り値:
-      cross_entropy: 交差エントロピーのtensor, float
-
-    """
-
-    # 交差エントロピーの計算
-    cross_entropy = -tf.reduce_sum(labels*tf.math.log(tf.clip_by_value(logits,1e-12,1.0)),reduction_indices=[1])
-
-    # TensorBoardで表示するよう指定
-    tf.compat.v1.summary.scalar("cross_entropy", cross_entropy)
-    print(cross_entropy)
-    return cross_entropy
-
-
-def training(loss, learning_rate):
-    """ 訓練のOpを定義する関数
-
-    引数:
-      loss: 損失のtensor, loss()の結果
-      learning_rate: 学習係数
-
-    返り値:
-      train_step: 訓練のOp
-
-    """
-
-    train_step = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(loss)
-    return train_step
-
-
-def accuracy(logits, labels):
-    """ 正解率(accuracy)を計算する関数
-
-    引数:
-      logits: inference()の結果
-      labels: ラベルのtensor, int32 - [batch_size, NUM_CLASSES]
-
-    返り値:
-      accuracy: 正解率(float)
-
-    """
-    correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-    tf.compat.v1.summary.scalar("accuracy",accuracy)
-    return accuracy
 
 def list_flatten(x):
     """
@@ -234,3 +239,138 @@ def list_flatten(x):
         else:
             result.append(el)
     return result
+
+
+
+if __name__ == '__main__':
+
+
+    test_video = []
+    test_label = []
+    #temp_video = []
+    test_name = []
+    video = []
+    framenum = 0
+    count = 0
+
+    for i, d in enumerate(test_dirs):
+        files = os.listdir(TEST_DIR + d)
+        tmp = np.zeros(NUM_CLASSES)
+        tmp[i] = 1
+
+        for f in files:
+            cap = cv2.VideoCapture(TEST_DIR + d + '/' + f)
+            video = []
+            framenum = 0
+            count = 0
+            test_name.append(f)
+
+            while(1):
+                framenum += 1
+                ret, img = cap.read()
+                if not ret:
+    	            break
+                if framenum%FPS == 0:
+                    count += 1
+                    img = cv2.resize(img, (int(WIDTH), int(HEIGHT)))
+                    #temp_video.append(img)
+                    video.append(img.flatten().astype(np.float32)/255.0)
+                    #print "[%d]%s: %d"%(count, f, framenum)
+                    print("[{}]{}: {}".format(count,f,framenum))
+                    if count == DEPTH:
+                        break
+            if count == DEPTH:
+                test_video.append(list_flatten(video))
+                test_label.append(tmp)
+
+    test_video = np.asarray(test_video)
+    print(test_label[i])
+    print("activation_function: {}".format(FLAGS.act_func))
+
+    with tf.Graph().as_default():
+        # 画像を入れる仮のTensor
+        videos_placeholder = tf.placeholder("float", shape=(None, IMAGE_PIXELS))
+        # ラベルを入れる仮のTensor
+        labels_placeholder = tf.placeholder("float", shape=(None, NUM_CLASSES))
+
+        keep_prob = tf.placeholder("float")
+        # inference()を呼び出してモデルを作る
+        logits = inference(videos_placeholder, keep_prob)
+
+        # 保存の準備
+        saver = tf.train.Saver()
+        # Sessionの作成
+        sess = tf.InteractiveSession()
+        # 変数の初期化
+        sess.run(tf.global_variables_initializer())
+
+    saver.restore(sess, MODEL_NAME)
+
+    os.mkdir(TEMP_DIR)
+    for i in range(NUM_CLASSES):
+        os.mkdir(TEMP_DIR + "/" + str(i))
+    txt = open(TEMP_DIR + TEXT_NAME, 'w')
+    txt.write("TEST_DIR: " + TEST_DIR + "\n")
+    txt.write("MODEL_NAME: " + MODEL_NAME + "\n")
+    txt.write("NUM_CLASSES: %d\n"%(NUM_CLASSES))
+    txt.write("COLOR_CHANNELS: %d\n"%(COLOR_CHANNELS))
+    txt.write("WIDTH: %d\n"%(WIDTH))
+    txt.write("HEIGHT: %d\n"%(HEIGHT))
+    txt.write("IMAGE_PIXELS: %d\n\n"%(IMAGE_PIXELS))
+    txt.write("activation_function: %s\n"%(FLAGS.act_func))
+
+
+    cate = []
+    label = []
+    count = 0
+    ok_sum = 0
+    # cate = [0, 0, 0, 0] 4category
+    for i in range(NUM_CLASSES):
+        cate.append(0)
+    # 動画の数分ループ
+    for i in range(len(test_video)):
+        print(test_name[i])
+        accr = logits.eval(session=sess, feed_dict={
+                videos_placeholder: [test_video[i]], keep_prob:1.0})[0]
+        # pred = nnの出力 0,1,2,3
+        pred = np.argmax(accr)
+        tmp = np.zeros(NUM_CLASSES)
+        tmp[pred] = 1
+        print(tmp)
+        txt.write("[%s](%d): %d\n"%(test_name[i], i, pred))
+        ssss = 0
+        for c in range(NUM_CLASSES):
+            txt.write("%f "%(accr[c]))
+            print(accr[c])
+            ssss = ssss + accr[c] # ssss is the sum of each accr
+        txt.write("  all: %f"%ssss) # edit by moriya
+        txt.write("\n\n")
+        #print "testing (%d/%d)"%(i+1, len(test_video))
+        print("testing ({}/{})".format(i+1, len(test_video)))
+        #category分ループ
+        for j in range(len(cate)):
+            if pred == j:
+                cate[j] = cate[j] + 1
+                if j == 0:
+                    print("output: other")
+                elif j == 1:
+                    print("output: food")
+                elif j == 2:
+                    print("output: car")
+                elif j == 3:
+                    print("output: cosme")
+                #cv2.imwrite(TEMP_DIR + "/" + str(j) + "/" + str(i) + ".png", temp_video[i])
+        if((test_label[i] == tmp).all()):
+            print("OK\n")
+            ok_sum += 1
+        else:
+            print("NG\n")
+
+#@ the number, just dividing OK (recognited) by all (including not OK).
+    txt.write("accuracy rate: %f %% [%d/%d]\n"%(float(ok_sum) / len(test_video) * 100, ok_sum, len(test_video)))
+    #print("accuracy rate: %f %% [%d/%d]"%(float(ok_sum) / len(test_video) * 100, ok_sum, len(test_video)))
+
+    print("accuracy rate: {} %% [{}/{}]".format(float(ok_sum) / len(test_video) * 100, ok_sum, len(test_video)))
+
+
+    txt.close()
