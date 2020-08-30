@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import global
+import global_
 
 
 if __name__ == '__main__':
