@@ -1,6 +1,16 @@
 import setting
 import func
 
+class main:
+    def file_input():
+        pass
+
+    def training():
+        pass
+
+    def file_output():
+        pass
+
 if __name__ == '__main__':
 
     # データを入れる配列
