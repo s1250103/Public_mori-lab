@@ -1,3 +1,4 @@
+## import part ##
 import numpy as np
 import sys
 sys.path.append("/usr/lib/python2.7/dist-packages")
@@ -10,7 +11,7 @@ import os
 import time
 import datetime
 
-
+## difinitions parts ##
 today = datetime.datetime.today()
 LOG_NAME = '/home/moriya/Desktop/old_researched/村上/murakami/log/' + today.strftime("%Y-%m-%d(%H-%M-%S)") + '.txt'
 MODEL_NAME = '/home/moriya/Desktop/old_researched/村上/murakami/model/' + today.strftime("%Y-%m-%d(%H-%M-%S)") + '.ckpt'
