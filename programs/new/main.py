@@ -2,6 +2,9 @@ import setting
 import func
 
 class main:
+    def __init__(self):
+        pass
+        
     def file_input():
         pass
 
