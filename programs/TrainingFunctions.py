@@ -105,7 +105,7 @@ def training_function(train_vid, train_label, video, labels):
 
     with tf.Graph().as_default():
         # 動画を入れる仮のTensor
-        videos_placeholder = tf.compat.v1.placeholder("float", shape=(None, IMAGE_PIXELS))
+        videos_placeholder = tf.compat.v1.placeholder("float")#
 
         #train_vidをvideos_placeholderに代入
 
@@ -116,8 +116,8 @@ def training_function(train_vid, train_label, video, labels):
         # ラベルを入れる仮のTensor
         labels_placeholder = tf.compat.v1.placeholder("float", shape=(None, NUM_CLASSES))
 
-        W = tf.Variable(tf.zeros([IMAGE_PIXELS,NUM_CLASSES]))
-        b = tf.Variable(tf.zeros([NUM_CLASSES]))
+        #W = tf.Variable(tf.zeros([IMAGE_PIXELS,NUM_CLASSES]))
+        #b = tf.Variable(tf.zeros([NUM_CLASSES]))
 
         keep_prob = tf.compat.v1.placeholder("float")
         # inference()を呼び出してモデルを作る
@@ -139,6 +139,7 @@ def training_function(train_vid, train_label, video, labels):
         #sess.run(tf.global_variables_initializer())
         sess.run(tf.compat.v1.global_variables_initializer())
         # TensorBoardで表示する値の設定
+
         os.mkdir(FLAGS.train_dir)
         #summary_op = tf.summary.merge_all()
         summary_op = tf.compat.v1.summary.merge_all()
@@ -183,21 +184,23 @@ def training_function(train_vid, train_label, video, labels):
             # summary_writer.add_summary(summary_str, step)
 
             if train_accuracy >= MAX_ACCURACY:
+                save_path = saver.save(sess, MODEL_NAME, global_step=step )
                 break
             elapsed_time = time.time() - start
             if elapsed_time >= FLAGS.max_time*60*60:
+                save_path = saver.save(sess, MODEL_NAME, global_step=step )
                 break
 
     print ("Elapsed Time: {0} [sec]".format(elapsed_time))
 
-    return sess, saver, log, step, elapsed_time, train_accuracy
+    return sess, log, step, elapsed_time, train_accuracy
 
-def file_output(sess, saver, log, train_vid, labels, step, elapsed_time, train_accuracy):
+def file_output(sess, log, train_vid, labels, step, elapsed_time, train_accuracy):
     print("executing file_output....")
 
     # 最終的なモデルを保存
 
-    save_path = saver.save(sess, MODEL_NAME)
+    #save_path = saver.save(sess, MODEL_NAME)
 
     print (FLAGS.train_dir)
 

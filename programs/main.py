@@ -10,8 +10,8 @@ from TestingFunctions import execution
 class main: # interface
     def make_model(self): # for training
         train_vid, train_label, video, labels = file_input()
-        sess, saver, log, step, elapsed_time, train_accuracy = training_function(train_vid, train_label, video, labels)
-        file_output(sess, saver, log, train_vid, labels, step, elapsed_time, train_accuracy)
+        sess, log, step, elapsed_time, train_accuracy = training_function(train_vid, train_label, video, labels)
+        file_output(sess, log, train_vid, labels, step, elapsed_time, train_accuracy)
 
     def test(self): # for testing
         initialize()

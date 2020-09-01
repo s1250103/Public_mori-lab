@@ -21,10 +21,10 @@ IMAGE_PIXELS = DEPTH*HEIGHT*WIDTH*COLOR_CHANNELS
 FPS = 14 #FPSの数ごとに一枚画像を取り出す
 FULL_CONNECT_UNIT = 1024
 
-flags = tf.app.flags
+flags = tf.compat.v1.flags
 FLAGS = flags.FLAGS
 
-flags.DEFINE_integer('max_steps', 10000, 'Number of steps to run trainer.')
+flags.DEFINE_integer('max_steps', 100, 'Number of steps to run trainer.')
 # flags.DEFINE_integer('hidden1', 64, 'Number of units in hidden layer 1.')
 # flags.DEFINE_integer('hidden2', 24, 'Number of units in hidden layer 2.')
 flags.DEFINE_integer('batch_size', 1, 'Batch size'
@@ -38,7 +38,7 @@ flags.DEFINE_integer('convs', 3, 'size of conv height & width')
 flags.DEFINE_integer('convd', 3, 'size of conv depth')
 flags.DEFINE_string('act_func', 'relu', 'activation function')
 flags.DEFINE_integer('max_time', 3, 'training time')
-flags.DEFINE_string('train_dir', 'TEMP_DIR', 'Directory to put the training data.')
+
 
 def inference(videos_placeholder, keep_prob, FULL_CONNECT_UNIT, NUM_CLASSES):
     """ 予測モデルを作成する関数
@@ -85,7 +85,7 @@ def inference(videos_placeholder, keep_prob, FULL_CONNECT_UNIT, NUM_CLASSES):
     x_video = tf.reshape(videos_placeholder, [-1, DEPTH, HEIGHT2, WIDTH2, COLOR_CHANNELS])
 
     # 畳み込み層1の作成
-    with tf.name_scope("conv1") as scope:
+    with tf.compat.v1.name_scope("conv1") as scope:
         W_conv1 = weight_variable([FLAGS.convd,FLAGS.convs,FLAGS.convs,COLOR_CHANNELS,FLAGS.channel1])
         b_conv1 = bias_variable([FLAGS.channel1])
         h_conv1 = activation_function(conv3d(x_video, W_conv1) + b_conv1)
@@ -93,13 +93,13 @@ def inference(videos_placeholder, keep_prob, FULL_CONNECT_UNIT, NUM_CLASSES):
         print("conv1      d:{} h:{} w:{} c:{}".format(d, h, w, c))
 
     # プーリング層1の作成
-    with tf.name_scope("pool1") as scope:
+    with tf.compat.v1.name_scope("pool1") as scope:
         h_pool1 = max_pool_2x2x2(h_conv1)
         mb, d, h, w, c = h_pool1.get_shape().as_list()
         print("pool1      d:{} h:{} w:{} c:{}".format(d, h, w, c))
 
     # 畳み込み層2の作成
-    with tf.name_scope("conv2") as scope:
+    with tf.compat.v1.name_scope("conv2") as scope:
         W_conv2 = weight_variable([FLAGS.convd,FLAGS.convs,FLAGS.convs,FLAGS.channel1,FLAGS.channel2])
         b_conv2 = bias_variable([FLAGS.channel2])
         h_conv2 = activation_function(conv3d(h_pool1, W_conv2) + b_conv2)
@@ -108,13 +108,13 @@ def inference(videos_placeholder, keep_prob, FULL_CONNECT_UNIT, NUM_CLASSES):
 
 
     # プーリング層2の作成
-    with tf.name_scope("pool2") as scope:
+    with tf.compat.v1.name_scope("pool2") as scope:
         h_pool2 = max_pool_2x2x2(h_conv2)
         mb, d, h, w, c = h_pool2.get_shape().as_list()
         print("pool2      d:{} h:{} w:{} c:{}".format( d ,  h ,  w ,  c ))
 
     # 畳み込み層3の作成
-    with tf.name_scope("conv3") as scope:
+    with tf.compat.v1.name_scope("conv3") as scope:
         W_conv3 = weight_variable([FLAGS.convd,FLAGS.convs,FLAGS.convs,FLAGS.channel2,FLAGS.channel3])
         b_conv3 = bias_variable([FLAGS.channel3])
         h_conv3 = activation_function(conv3d(h_pool2, W_conv3) + b_conv3)
@@ -122,13 +122,13 @@ def inference(videos_placeholder, keep_prob, FULL_CONNECT_UNIT, NUM_CLASSES):
         print("conv3     d:{} h:{} w:{} c:{}".format( d , h,  w ,  c ))
 
     # プーリング層3の作成
-    with tf.name_scope("pool3") as scope:
+    with tf.compat.v1.name_scope("pool3") as scope:
         h_pool3 = max_pool_2x2x2(h_conv3)
         mb, d, h, w, c = h_pool3.get_shape().as_list()
         print("pool3      d:{} h:{} w:{} c:{}".format( d ,  h ,  w ,  c ))
 
     # 畳み込み層4の作成
-    with tf.name_scope("conv4") as scope:
+    with tf.compat.v1.name_scope("conv4") as scope:
         W_conv4 = weight_variable([FLAGS.convd,FLAGS.convs,FLAGS.convs,FLAGS.channel3,FLAGS.channel4])
         b_conv4 = bias_variable([FLAGS.channel4])
         h_conv4 = tf.nn.relu(conv3d(h_pool3, W_conv4) + b_conv4)
@@ -137,37 +137,13 @@ def inference(videos_placeholder, keep_prob, FULL_CONNECT_UNIT, NUM_CLASSES):
 
 
     # プーリング層4の作成
-    with tf.name_scope("pool4") as scope:
+    with tf.compat.v1.name_scope("pool4") as scope:
         h_pool4 = max_pool_2x2x2(h_conv4)
         mb, d, h, w, c = h_pool4.get_shape().as_list()
         print("pool4      d:{} h:{} w:{} c:{}".format(d, h, w, c))
 
-
-        """
-     #畳み込み層5aの作成
-    with tf.name_scope("conv5a") as scope:
-        W_conv5a = weight_variable([FLAGS.convd,FLAGS.convs,FLAGS.convs,FLAGS.channel4,FLAGS.channel4])
-        b_conv5a = bias_variable([FLAGS.channel4])
-        h_conv5a = tf.nn.relu(conv3d(h_pool4, W_conv5a) + b_conv5a)
-        mb, d, h, w, c = h_conv5a.get_shape().as_list()
-        print "conv5a     d:%d h:%d w:%d c:%d"%(d, h, w, c)
-
-     #畳み込み層5bの作成
-    with tf.name_scope("conv5b") as scope:
-        W_conv5b = weight_variable([FLAGS.convd,FLAGS.convs,FLAGS.convs,FLAGS.channel4,FLAGS.channel4])
-        b_conv5b = bias_variable([FLAGS.channel4])
-        h_conv5b = tf.nn.relu(conv3d(h_conv5a, W_conv5b) + b_conv5b)
-        mb, d, h, w, c = h_conv5b.get_shape().as_list()
-        print "conv5b     d:%d h:%d w:%d c:%d"%(d, h, w, c)
-
-     #プーリング層5の作成
-    with tf.name_scope("pool5") as scope:
-        h_pool5 = max_pool_2x2x2(h_conv5b)
-        mb, d, h, w, c = h_pool5.get_shape().as_list()
-        print "pool5      d:%d h:%d w:%d c:%d"%(d, h, w, c)
-        """
     # 結合層1の作成
-    with tf.name_scope("fc1") as scope:
+    with tf.compat.v1.name_scope("fc1") as scope:
         mb, d, h, w, c = h_pool4.get_shape().as_list()
         W_fc1 = weight_variable([d*h*w*c, FULL_CONNECT_UNIT])#前者から後者のヘッジをつなげた。
         b_fc1 = bias_variable([FULL_CONNECT_UNIT])
@@ -178,12 +154,12 @@ def inference(videos_placeholder, keep_prob, FULL_CONNECT_UNIT, NUM_CLASSES):
 
 
     # 結合層2の作成
-    with tf.name_scope("fc2") as scope:
+    with tf.compat.v1.name_scope("fc2") as scope:
         W_fc2 = weight_variable([FULL_CONNECT_UNIT, NUM_CLASSES])
         b_fc2 = bias_variable([NUM_CLASSES])
 
     # ソフトマックス関数による正規化
-    with tf.name_scope("softmax") as scope:
+    with tf.compat.v1.name_scope("softmax") as scope:
         y_conv = tf.nn.softmax(tf.matmul(h_fc_1_drop, W_fc2) + b_fc2)
 
     # 各ラベルの確率のようなものを返す
@@ -201,7 +177,7 @@ def activation_function(x):
     elif FLAGS.act_func == 'sigmoid':
         y = tf.nn.sigmoid(x)
     elif FLAGS.act_func == 'crelu':
-        y = tf.nn.crelu(x)
+        y = tf.nn.crelu(features=x)
     elif FLAGS.act_func == 'leaky_relu':
         y = tf.nn.leaky_relu(x)
     elif FLAGS.act_func == 'relu6':
@@ -222,7 +198,8 @@ def loss(logits, labels):
     """
 
     # 交差エントロピーの計算
-    cross_entropy = -tf.reduce_sum(labels*tf.math.log(tf.clip_by_value(logits,1e-12,1.0)),reduction_indices=[1])
+    #cross_entropy = -tf.reduce_sum(labels*tf.math.log(tf.clip_by_value(logits,1e-12,1.0)),reduction_indices=[1])
+    cross_entropy = -tf.reduce_sum(input_tensor=labels*tf.math.log(tf.clip_by_value(logits,1e-12,1.0)),axis=[1])
 
     # TensorBoardで表示するよう指定
     tf.compat.v1.summary.scalar("cross_entropy", cross_entropy)
@@ -255,8 +232,8 @@ def accuracy(logits, labels):
       accuracy: 正解率(float)
 
     """
-    correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+    correct_prediction = tf.equal(tf.argmax(input=logits, axis=1), tf.argmax(labels, 1))
+    accuracy = tf.reduce_mean(input_tensor=tf.cast(correct_prediction, "float"))
     tf.compat.v1.summary.scalar("accuracy",accuracy)
     return accuracy
 

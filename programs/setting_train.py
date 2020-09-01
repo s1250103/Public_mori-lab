@@ -12,7 +12,7 @@ TRAIN_DIR = '/home/moriya/Desktop/old_researched/村上/Project/nn_test/CM_vid/'
 # train_img_dirs = ['0.other', '1.food', '2.car', '3.cosme', '4.drug', '5.movie', '6.game', '7.phone', '8.clean']
 train_vid_dirs = ['0.other', '1.food', '2.car', '3.cosme']
 NUM_CLASSES = len(train_vid_dirs)
-
+flags.DEFINE_string('train_dir', TEMP_DIR, 'Directory to put the training data.')
 # flags.DEFINE_string('train', 'train.txt', 'File name of train data')
 #flags.DEFINE_string('test', 'test2.txt', 'File name of test data')
 #flags.DEFINE_string('train_dir', TEMP_DIR, 'Directory to put the training data.')
