@@ -1,32 +1,62 @@
 from setting_train import *
 
 def file_input():
-    # The function input files and makes the model.
+    ## The function input files and makes the model.
     print("executing file_input().....")
-    # global
-    train_vid = []
-    train_label = []
-    video = []
-    labels = []
+    ## global
+    #train_vid = []
+    #train_label = []
+    video_forTrainning = []
+    label_ofVideo = []
+    ## train_vid @ video_forTrainning
+    ## train_label @ label_ofVideo
 
-    # local
-    count = 0
-    framenum = 0
+    #video = []
+    ## 下で重複している
+
+    #labels = []
+
+    ## local
+    ## 下で重複している。
+    #count = 0
+    #numFreme_one = 0
+
+    numFrame_Whole = 0
+
+    #for i, d in enumerate(train_vid_dirs):
+    for i, each_VideoTypeDirectoty in enumerate(VideoTypeDirectoty):
+        ## train_vid_dirs -> ['0.other', '1.food', '2.car', '3.cosme'] : defined in the system.
+        ## loop means -> (0, '0.other'), (1, '1.food'), ..., (i, d)
+        ## d は　each_VideoTypeDirectotyに変更した。
 
 
-    v = 0
-    for i, d in enumerate(train_vid_dirs):
         # 各ディレクトリ内のファイル名取得
         # 0.food,  1.car  2.cosme
-        files = os.listdir(TRAIN_DIR + d)
+        type_class = os.listdir(TRAIN_DIR + each_VideoTypeDirectoty)
+        ## TRAIN_DIR -> /CM_vid/ : direcroty path
+        ## d -> 0.other, 1.food, ... : defined in the system
+        ## files -> path/0.other, path/1.food, ...
+        ## files @ type_class
+
         tmp = np.zeros(NUM_CLASSES)
+        ## NUM_CLASSES -> len(train_vid_dirs) : 4
+        ## tmp : [0, 0, 0, 0]
         tmp[i] = 1
-        for f in files:
+        ## tmp : [1, 0, 0, 0]
+        for f in type_class:
+            ## f : path/0.other, path/1.food, ...
             #カテゴリ毎に動画を読み込む
-            cap = cv2.VideoCapture(TRAIN_DIR + d + '/' + f)
-            print(TRAIN_DIR + d + '/' + f)
-            video = []
-            framenum = 0
+            ## あるカテゴリの中の、１つ動画を読み込んで、扱っていく
+            #cap = cv2.VideoCapture(TRAIN_DIR + each_VideoTypeDirectoty + '/' + f)
+            input_video = cv2.VideoCapture(TRAIN_DIR + each_VideoTypeDirectoty + '/' + f)
+            ## VideoCapture() :  動画ファイルを読み込んでいる。
+            ## TRAIN_DIR + d + '/' + f -> /path/0.other/ ????
+            ## cap @ input_video
+            print(TRAIN_DIR + each_VideoTypeDirectoty + '/' + f)
+            #video = []
+            TMP_list_originated_video = []
+            #video @ TMP_list_originated_video
+            numFreme_one = 0
             count = 0
             while(1):
                 ###
@@ -34,34 +64,63 @@ def file_input():
                 # framenum : 動画の全フレーム数
                 # count    : FPSを減らした時の動画の全フレーム数
                 ###
-                v += 1
-                framenum += 1
-                ret, img = cap.read()
-                # print(ret)
-                if not ret:
+
+                ## v は numFrame_Whole　に変更
+                ## framenum は numFreme_one　に変更
+                numFrame_Whole += 1
+                numFreme_one += 1
+                IO_read, img = input_video.read()
+                ## cap.read() : ある１つの動画に対して、 IO_read=読み込めたかどうか(bool), img=ndarrayのタプル　を返す
+                ## ret は　IO_read に変更
+                if not IO_read: ## この場合は、動画が読み込めなかったことを意味する。
+                    ## ループを次に進める
                     print("error")
-                    # sys.exit()
                     break
-                if framenum % FPS == 0:
+                if numFreme_one % FPS == 0: ## もしあるCMに対して、１４フレーム、２８フレーム...のときにおいて
+                    ## FPS -> 14
                     count += 1
-                    img = cv2.resize(img, (int(WIDTH), int(HEIGHT)))
-                    # cv2.imwrite("test.png", img)
-                    img = img.flatten().astype(np.float32)/255.0
-                    img = img.tolist()
-                    video.append(img)
+                    ## count : あるCMを１４秒おきに切り取った回数。
+                    #img = cv2.resize(img, (int(WIDTH), int(HEIGHT)))
+                    img_resize = cv2.resize(img, (int(WIDTH), int(HEIGHT)))
+                    ## img は　img_resize にした。なぜなら、入力のimgとは違うものであるから。
+                    ## resize() : 画像を、８０ x 45 に変換している
+                    ## WIDTH : 80 in the environment
+                    ## HEIGHT : 45 in the environment
+                    #img = img_.flatten().astype(np.float32)/255.0
+                    img_flatten = img_resize.flatten().astype(np.float32)/255.0
+                    ## img_resize は　img_flatten にした。なぜなら、入力のimg_resizeとは違うものであるから。
+                    ## flatten().astype(np.float32)/255.0 : 画像を配列にした。それを255で正規化。
+
+                    img_list = img_flatten.tolist()
+                    ## tolist() : NumPy配列ndarrayをリスト型listに変換
+                    TMP_list_originated_video.append(img_list)
+                    ##　TMP_list_originated_videoに加えた。
+
                     #video.append(img.flatten().astype(np.float32)/255.0)
                     #print ("[%d]%s: %s : %d")%(count, d, f, i)
-                    print("[{}]{}: {} : {}".format(count, d, f, i))
+                    print("[{}]{}: {} : {}".format(count, each_VideoTypeDirectoty, f, i))
+                    ## print 0,
 
                     if count == DEPTH:
+                                        ## もしあるCMに対して、１４フレーム、２８フレーム...のときにおいて、
+                                        ## あるCMを１４秒おきに切り取った回数が３０になったとき。
+                                        ## つまり、動画から、枚画像を切り出した場合、ループから抜ける。
                         break
             if count == DEPTH:
-                video = list_flatten(video)
-                video = np.array(video)
-                train_vid.append(video)
+                                ## もしあるCMに対して、１４フレーム、２８フレーム...でないときにおいて、　
+                                ## かつ、　あるCMを１４秒おきに切り取った回数が３０になったとき。　
+                                ## つまり、動画から、３０枚画像を切り出した場合、ループから抜ける。
+                list_originated_some_videos = list_flatten(TMP_list_originated_video)
+                ## list_flatten() : すでにあるCMに対して、１４フレーム、２８フレーム...おきに画像を切り取った。　そしてその画像は既にそれぞれ、配列になっている。つまり画像の枚数分（それはDEPTH=30である）の配列があるはず。それらを全て一つの配列（動画１つ分に対応している）に統合する。
+                list_originated_some_videos_numpy = np.array(list_originated_some_videos)
+                ## np.array() : numpyの配列に正している。
+                train_vid.append(list_originated_some_videos_numpy)
+                ## それをtrain_vidにくわえている。
+
                 #train_vid.append(list_flatten(video))
             #print(train_vid)
                 train_label.append(tmp)
+                ## train_labelに、必ず[1,0,0,0]を入れている。
 
 
 
@@ -79,18 +138,21 @@ def file_input():
             ###
 
             # print "[%d]%s: %s : %d"%(v, d, f, i)
-        labels.append(len(files))
+        #labels.append(len(files))
+        ## labels にfilsのサイズ -> 4を入れている。
 
     #print ("train_label:%s   train_video:%s")%(len(train_label), len(train_vid))
     #""
-    print("train_label:{} train_video:{}".format(len(train_label),len(train_vid)))
+    print("train_label:{} train_video:{}".format(len(label_ofVideo),len(video_forTrainning)))
     #print ("DEPTH:%d       FPS:%d")%(DEPTH, FPS)
-    print("DEPTH:{}      FPS:{}".format(len(train_label),len(train_vid)))
+    print("DEPTH:{}      FPS:{}".format(len(label_ofVideo),len(video_forTrainning)))
     # numpy形式に変換
-    train_vid = np.asarray(train_vid)
-    train_label = np.asarray(train_label)
-    print(train_vid.shape)
-    print(train_label.shape)
+    video_forTrainning = np.asarray(video_forTrainning)
+    ## video_forTrainningがnumpy形式に変換されている
+    label_ofVideo = np.asarray(label_ofVideo)
+    ## label_ofVideoがnumpy形式に変換されている
+    print(video_forTrainning.shape)
+    print(label_ofVideo.shape)
     #print("batch size:    %d")%(FLAGS.batch_size)
     print("batch size:     {}".format(FLAGS.batch_size))
     #print("learning rate: %g")%(FLAGS.learning_rate)
@@ -98,9 +160,12 @@ def file_input():
     #print("activation_function: %s")%(FLAGS.act_func)
     print("activation_function: {}".format(FLAGS.act_func))
 
-    return train_vid, train_label, video, labels
+    return video_forTrainning, label_ofVideo
 
-def training_function(train_vid, train_label, video, labels):
+
+
+
+def training_function(train_vid, train_label):
     print("executing training.....")
 
     with tf.Graph().as_default():
@@ -117,10 +182,7 @@ def training_function(train_vid, train_label, video, labels):
         labels_placeholder = tf.compat.v1.placeholder("float", shape=(None, NUM_CLASSES))
 
         #W = tf.Variable(tf.zeros([IMAGE_PIXELS,NUM_CLASSES]))
-        #b = tf.Variable(tf.zeros([NUM_CLASSES]))
-
-        keep_prob = tf.compat.v1.placeholder("float")
-        # inference()を呼び出してモデルを作る
+        #b = tf.Variable(tf.zeros([NUM_CLASSES]
         logits = inference(videos_placeholder, keep_prob, FULL_CONNECT_UNIT, NUM_CLASSES)
         # loss()を呼び出して損失を計算
         loss_value = loss(logits, labels_placeholder)
@@ -129,7 +191,14 @@ def training_function(train_vid, train_label, video, labels):
         # 精度の計算
         acc = accuracy(logits, labels_placeholder)
 
+
+        #### ここまでがモデルの作成、　ここから保存の準備
+        ## sessは/model/年月日時間.ckptを保存している。（この中で！！）
+
+
+
         # 保存の準備
+
         #saver = tf.train.Saver()
         saver = tf.compat.v1.train.Saver()
         # Sessionの作成
@@ -146,8 +215,12 @@ def training_function(train_vid, train_label, video, labels):
         #summary_writer = tf.summary.FileWriter(FLAGS.train_dir, sess.graph)
         summary_writer = tf.compat.v1.summary.FileWriter(FLAGS.train_dir, sess.graph)
 
+        #### ここまでが保存の準備、ここからが訓練の実行
+
         # 訓練の実行
         log = open(LOG_NAME, 'w')
+        ## log : /log/年月日時間.txt というものを作って、書き込もうとしている。
+
         log.write('Start Time: ')
         today = datetime.datetime.today()
         log.write(today.strftime("%Y/%m/%d %H:%M:%S"))
@@ -193,9 +266,11 @@ def training_function(train_vid, train_label, video, labels):
 
     print ("Elapsed Time: {0} [sec]".format(elapsed_time))
 
-    return sess, log, step, elapsed_time, train_accuracy
+    return log, step, elapsed_time, train_accuracy
 
-def file_output(sess, log, train_vid, labels, step, elapsed_time, train_accuracy):
+
+#def file_output(sess, log, train_vid, labels, step, elapsed_time, train_accuracy):
+def file_output(log, train_vid, labels, step, elapsed_time, train_accuracy):
     print("executing file_output....")
 
     # 最終的なモデルを保存
@@ -217,7 +292,7 @@ def file_output(sess, log, train_vid, labels, step, elapsed_time, train_accuracy
     log.write("MAX_ACCURACY: %f\n"%(MAX_ACCURACY))
     log.write("Train Video Total: %d\n"%(len(train_vid)))
     log.write('Train Video Directories: ')
-    for i, d in enumerate(train_vid_dirs):
+    for i, d in enumerate(VideoTypeDirectoty):
         log.write("%s(%d), "%(d, labels[i]))
     log.write("\n")
     log.write("Max Steps: %d\n"%(FLAGS.max_steps))

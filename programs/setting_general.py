@@ -40,6 +40,10 @@ flags.DEFINE_string('act_func', 'relu', 'activation function')
 flags.DEFINE_integer('max_time', 3, 'training time')
 
 
+
+
+
+
 def inference(videos_placeholder, keep_prob, FULL_CONNECT_UNIT, NUM_CLASSES):
     """ 予測モデルを作成する関数
 
@@ -164,6 +168,7 @@ def inference(videos_placeholder, keep_prob, FULL_CONNECT_UNIT, NUM_CLASSES):
 
     # 各ラベルの確率のようなものを返す
     return y_conv
+    ## y_conv : softmax(xW + b) のこと。
 
 def activation_function(x):
     if FLAGS.act_func == 'relu':
