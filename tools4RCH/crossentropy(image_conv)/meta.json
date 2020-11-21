@@ -1,0 +1,19 @@
+{
+  "Project" : {
+    "+ Name" : "crossentropy(image_conv)",
+    "- Date_launch" : "11/21",
+
+    "+ meta_info" : "meta.json",
+    "+ Generator" : "generator",
+    "+ MODEL" : {
+      "+ file" : "model.hd5",
+      "+ instruction" : "NULL"
+    },
+
+    "Tester" : "tester",
+
+
+  }
+
+
+}
