@@ -6,6 +6,10 @@
 </head>
 
 <body><h4>
+    <table>
+      <tr><th>Date</th></tr>
+    </table>
+
     <ul>
       <li>
         <date> 9/21 </date>
@@ -27,7 +31,7 @@
               二乗誤差
             </li>
 
-      
+
 
 
           </ul>
