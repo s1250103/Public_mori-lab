@@ -1,6 +1,6 @@
 {
   "Project" : {
-    "+ Name" : "crossentropy(image_conv)",
+    "+ Name" : "1121.crossentropy(image_conv)",
     "- Date_launch" : "11/21",
 
     "+ meta_info" : "meta.json",
@@ -14,6 +14,5 @@
 
 
   }
-
 
 }
