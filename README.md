@@ -7,10 +7,10 @@
 <body><h4>
     <table>
       <tr>
-        <th>Date</th>
-        <th>Title</th>
-        <th>Contents</th>
-        <th>result</th>
+        <th>日付</th>
+        <th>概要</th>
+        <th>内容</th>
+        <th>結果</th>
       </tr>
       <tr>
         <td> 9/21 </td>
@@ -30,7 +30,10 @@
           </ul>
         </td>
         <td>
-          result
+          <ul>
+            <li>ローカルに設置する代わりに、github上に設置した。これにより、githubとjupyterを動かせる環境があれば研究ができる。</li>
+            <li>READMEをログにした。さらにtableタグで管理することにした。仕様はだいぶ変更された。</li>
+          </ul>
         </td>
       </tr>
     </table>
