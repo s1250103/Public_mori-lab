@@ -7,7 +7,11 @@
 
 <body><h4>
     <table>
-      <tr><th>Date</th></tr>
+      <tr>
+        <th>Date</th>
+        <th>Title</th>
+        <th colspan="8">Contents</th>
+      </tr>
     </table>
 
     <ul>
