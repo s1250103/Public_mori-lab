@@ -12,6 +12,15 @@
         <th>Title</th>
         <th colspan="8">Contents</th>
       </tr>
+      <tr>
+        <td> 9/21 </td>
+        <td>
+          それぞれ４つの違う誤差関数{クロスエントロピー、二乗誤差、絶対誤差、対数誤差} によって訓練されたモデルを作る
+        </td>
+        <td>
+          aaaaaaaa
+        </td>
+      </tr>
     </table>
 
     <ul>
