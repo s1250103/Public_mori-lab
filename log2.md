@@ -10,7 +10,8 @@
       <tr>
         <th>Date</th>
         <th>Title</th>
-        <th colspan="8">Contents</th>
+        <th>Contents</th>
+        <th>result</th>
       </tr>
       <tr>
         <td> 9/21 </td>
@@ -28,6 +29,9 @@
               </ul>
             </li>
           </ul>
+        </td>
+        <td>
+          result
         </td>
       </tr>
     </table>
